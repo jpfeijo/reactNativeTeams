@@ -2,6 +2,7 @@ import { Input } from "@components/Input";
 import { Header } from "@components/Header";
 import { Filter } from "@components/Filter";
 import { Button } from "@components/Button";
+import { Loading } from "@components/Loading";
 import { ListEmpty } from "@components/ListEmpty";
 import { Highlight } from "@components/Highlight";
 import { ButtonIcon } from "@components/ButtonIcon";
@@ -26,6 +27,7 @@ type RouteParams = {
 }
 
 export function Players() {
+    const [isLoading, setIsLoading] = useState(true);
     const [newPlayerName, setNewPlayerName] = useState('');
     const [team, setTeam] = useState('Time A');
     const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
@@ -66,8 +68,12 @@ export function Players() {
 
     async function fetchPlayersByTeam() {
         try {
+            setIsLoading(true);
+
             const playersByTeam = await playersGetByGroupAndTeam(group, team);
             setPlayers(playersByTeam);
+            
+            setIsLoading(false);
         } catch (error) {
             Alert.alert('Pessoas', 'Não foi possível carregar as pessoas do time selecionado.')
         }
@@ -134,18 +140,24 @@ export function Players() {
             </Form>
 
             <HeaderList>
-                <FlatList 
-                    data={['Time A', 'Time B']}
-                    keyExtractor={item => item}
-                    renderItem={({ item }) => (
-                        <Filter 
-                            title={item}
-                            isActive={item === team}
-                            onPress={() => setTeam(item)}
-                        />
-                    )}
-                    horizontal
-                />
+
+                {
+                    isLoading ? <Loading /> :
+                
+                    <FlatList 
+                        data={['Time A', 'Time B']}
+                        keyExtractor={item => item}
+                        renderItem={({ item }) => (
+                            <Filter 
+                                title={item}
+                                isActive={item === team}
+                                onPress={() => setTeam(item)}
+                            />
+                        )}
+                        horizontal
+                    />
+                }
+
                 <NumbersOfPlayers>
                     {players.length}
                 </NumbersOfPlayers>
